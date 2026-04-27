@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Folio — 讀完一本書，再認識一個人</title>
+  <meta name="description" content="Folio 是一個讀書交友 app。先匿名一起讀完一本書，再決定要不要認識彼此。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;500;600;700;900&family=Noto+Sans+TC:wght@300;400;500;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+:root {
+  --paper: #F2EDE2;
+  --paper-2: #EAE3D3;
+  --paper-deep: #DDD3BD;
+  --ink: #1A1815;
+  --ink-soft: #2D2A24;
+  --ink-mute: #6B645A;
+  --amber: #B8884A;
+  --amber-soft: #D9BE8E;
+  --serif: "Noto Serif TC", "EB Garamond", "Songti TC", serif;
+  --sans: "Noto Sans TC", -apple-system, system-ui, sans-serif;
+  --garamond: "EB Garamond", "Noto Serif TC", serif;
+  --mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0; padding: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background-image:
+    radial-gradient(rgba(26,24,21,0.025) 1px, transparent 1px),
+    radial-gradient(rgba(26,24,21,0.02) 1px, transparent 1px);
+  background-size: 3px 3px, 7px 7px;
+  background-position: 0 0, 1px 2px;
+}
+
+a { color: inherit; }
+::selection { background: var(--ink); color: var(--paper); }
+h1, h2, h3, h4, p { margin: 0; }
+.folio-root { min-height: 100vh; width: 100%; }
+html { scroll-behavior: smooth; }
+body { overflow-x: hidden; }
+
+.topframe {
+  position: sticky; top: 0; z-index: 50;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 22px 40px;
+  border-bottom: 1px solid rgba(26,24,21,0.12);
+  background: rgba(242,237,226,0.85);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  font-family: var(--garamond); font-size: 13px;
+  letter-spacing: 0.18em; text-transform: uppercase;
+}
+.topframe .brand {
+  font-family: var(--serif); font-weight: 600; font-size: 22px;
+  letter-spacing: 0.02em; text-transform: none;
+}
+.topframe .brand .dot { color: var(--amber); }
+.topframe .nav { display: flex; gap: 36px; color: var(--ink-mute); }
+.topframe .nav a:hover { color: var(--ink); }
+
+.section {
+  position: relative; padding: 120px 40px;
+  max-width: 1280px; margin: 0 auto;
+}
+
+.eyebrow {
+  font-family: var(--garamond); font-style: italic; font-size: 14px;
+  letter-spacing: 0.14em; color: var(--amber); text-transform: lowercase;
+  margin-bottom: 18px; display: inline-flex; align-items: center; gap: 14px;
+}
+.eyebrow::before { content: ''; width: 32px; height: 1px; background: var(--amber); }
+
+.section-num {
+  font-family: var(--garamond); font-style: italic; font-size: 13px;
+  letter-spacing: 0.3em; color: var(--ink-mute);
+}
+
+.h-section {
+  font-family: var(--serif); font-weight: 400;
+  font-size: clamp(36px, 4.4vw, 64px);
+  line-height: 1.1; letter-spacing: -0.015em;
+}
+
+.body-lg {
+  font-family: var(--sans); font-size: 18px; line-height: 1.7;
+  color: var(--ink-soft); font-weight: 300;
+}
+
+.hero {
+  height: 100vh; min-height: 760px; position: relative;
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.hero-stage {
+  position: relative; width: min(1100px, 92vw); height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  perspective: 2200px;
+}
+.book {
+  position: relative; width: min(820px, 88vw); height: min(560px, 64vh);
+  transform-style: preserve-3d; display: flex;
+}
+.book-cover, .book-page {
+  position: absolute; top: 0; left: 50%; width: 50%; height: 100%;
+  background: var(--paper-2); transform-origin: left center;
+  border: 1px solid rgba(26,24,21,0.18);
+  box-shadow: inset 1px 0 0 rgba(255,255,255,0.6), 0 30px 60px -20px rgba(26,24,21,0.25);
+  backface-visibility: hidden;
+}
+.book-cover {
+  background: linear-gradient(180deg, rgba(0,0,0,0.04), transparent 30%, rgba(0,0,0,0.05)), var(--paper-deep);
+  display: flex; flex-direction: column; justify-content: space-between;
+  padding: 38px 40px; z-index: 3; transform-style: preserve-3d;
+}
+.book-cover-inner {
+  position: absolute; inset: 0; background: var(--paper);
+  transform: rotateY(180deg); backface-visibility: hidden;
+  padding: 38px 40px; display: flex; flex-direction: column; justify-content: space-between;
+}
+.book-spine {
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 2px; height: 100%;
+  background: linear-gradient(180deg, transparent, rgba(26,24,21,0.22) 10%, rgba(26,24,21,0.22) 90%, transparent);
+  z-index: 4; pointer-events: none;
+}
+.book-page-left {
+  left: 0; transform-origin: right center;
+  background: linear-gradient(270deg, rgba(0,0,0,0.06), transparent 30%), var(--paper);
+  padding: 50px; z-index: 1;
+  display: flex; flex-direction: column; justify-content: space-between; border-right: none;
+}
+.cover-title {
+  font-family: var(--serif); font-weight: 500; font-size: 64px;
+  line-height: 0.95; letter-spacing: -0.02em;
+}
+.cover-title .amp { color: var(--amber); font-style: italic; font-family: var(--garamond); }
+.cover-meta {
+  display: flex; flex-direction: column; gap: 8px;
+  font-family: var(--garamond); font-style: italic; font-size: 13px;
+  color: var(--ink-mute); letter-spacing: 0.08em;
+}
+.cover-rule { width: 60px; height: 1px; background: var(--ink); opacity: 0.3; }
+.cover-tag {
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: 0.3em; color: var(--ink-mute); text-transform: uppercase;
+}
+.hero-tagline {
+  font-family: var(--serif); font-size: 19px; line-height: 1.6;
+  font-weight: 400; color: var(--ink-soft); max-width: 320px;
+}
+.hero-h1 {
+  font-family: var(--serif); font-weight: 400;
+  font-size: clamp(36px, 4.6vw, 60px);
+  line-height: 1.05; letter-spacing: -0.02em; margin-bottom: 18px;
+}
+.hero-h1 .ital { font-family: var(--garamond); font-style: italic; color: var(--amber); }
+
+.scroll-hint {
+  position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.3em;
+  text-transform: uppercase; color: var(--ink-mute);
+  display: flex; flex-direction: column; align-items: center; gap: 10px; z-index: 5;
+}
+.scroll-hint .line {
+  width: 1px; height: 40px; background: var(--ink-mute);
+  animation: drip 2s ease-in-out infinite; transform-origin: top;
+}
+@keyframes drip {
+  0%, 100% { transform: scaleY(0.4); opacity: 0.3; }
+  50% { transform: scaleY(1); opacity: 1; }
+}
+
+.corner { position: fixed; width: 18px; height: 18px; pointer-events: none; z-index: 60; opacity: 0.4; }
+.corner svg { width: 100%; height: 100%; }
+.corner.tl { top: 14px; left: 14px; }
+.corner.tr { top: 14px; right: 14px; transform: rotate(90deg); }
+.corner.bl { bottom: 14px; left: 14px; transform: rotate(-90deg); }
+.corner.br { bottom: 14px; right: 14px; transform: rotate(180deg); }
+
+.divider {
+  display: flex; align-items: center; gap: 18px;
+  max-width: 1280px; margin: 0 auto; padding: 0 40px;
+}
+.divider .line { flex: 1; height: 1px; background: rgba(26,24,21,0.18); }
+.divider .ornament {
+  font-family: var(--garamond); font-style: italic;
+  color: var(--ink-mute); font-size: 14px; letter-spacing: 0.2em;
+}
+
+.steps {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0;
+  margin-top: 80px;
+  border-top: 1px solid rgba(26,24,21,0.18);
+  border-bottom: 1px solid rgba(26,24,21,0.18);
+}
+.step { padding: 48px 36px 56px; border-right: 1px solid rgba(26,24,21,0.12); position: relative; }
+.step:last-child { border-right: none; }
+.step-num {
+  font-family: var(--garamond); font-style: italic; font-size: 96px;
+  line-height: 1; color: var(--amber); margin-bottom: 18px; font-weight: 400;
+}
+.step-title { font-family: var(--serif); font-size: 26px; font-weight: 500; margin-bottom: 14px; letter-spacing: -0.01em; }
+.step-body { font-family: var(--sans); font-size: 14.5px; line-height: 1.7; color: var(--ink-soft); font-weight: 300; }
+
+.dialogue {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 80px;
+  margin-top: 60px; align-items: start;
+}
+.dialogue .col { padding: 28px 0; }
+.dialogue .col + .col {
+  border-left: 1px solid rgba(26,24,21,0.18);
+  padding-left: 80px; margin-left: -40px;
+}
+.dialogue .label {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.25em;
+  text-transform: uppercase; color: var(--ink-mute); margin-bottom: 14px;
+}
+.dialogue .quote {
+  font-family: var(--serif); font-size: 28px; line-height: 1.4;
+  font-weight: 400; letter-spacing: -0.005em;
+}
+.dialogue .quote.crossed { color: var(--ink-mute); position: relative; }
+.dialogue .quote.crossed::before {
+  content: ''; position: absolute; top: 50%; left: -8px; right: -8px;
+  height: 1px; background: var(--ink-mute); transform-origin: left;
+}
+.dialogue .attr {
+  margin-top: 20px; font-family: var(--garamond); font-style: italic;
+  font-size: 14px; color: var(--ink-mute); letter-spacing: 0.05em;
+}
+
+.chapter-rail { margin-top: 60px; position: relative; }
+.rail-line { position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: rgba(26,24,21,0.18); }
+.rail-progress {
+  position: absolute; left: 0; top: 50%; height: 1px; background: var(--ink);
+  transform-origin: left; transform: scaleX(0);
+  transition: transform 1.6s cubic-bezier(.2,.7,.2,1);
+}
+.rail-stops { display: flex; justify-content: space-between; position: relative; }
+.stop { display: flex; flex-direction: column; align-items: center; width: 130px; text-align: center; }
+.stop-dot {
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--paper); border: 1px solid var(--ink);
+  z-index: 2; margin-bottom: 14px; transition: background 0.4s, transform 0.4s;
+}
+.stop.done .stop-dot { background: var(--ink); transform: scale(1.15); }
+.stop.reveal .stop-dot {
+  background: var(--amber); border-color: var(--amber); transform: scale(1.4);
+  box-shadow: 0 0 0 6px rgba(184,136,74,0.18);
+}
+.stop-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 6px; }
+.stop-name { font-family: var(--serif); font-size: 14px; font-weight: 500; }
+.stop-top {
+  position: absolute; bottom: 100%; margin-bottom: 28px;
+  font-family: var(--garamond); font-style: italic; font-size: 12px;
+  color: var(--ink-mute); white-space: nowrap;
+}
+
+.waitlist {
+  background: var(--paper-2);
+  border-top: 1px solid rgba(26,24,21,0.18);
+  border-bottom: 1px solid rgba(26,24,21,0.18);
+  padding: 120px 40px; position: relative;
+}
+.waitlist::before, .waitlist::after {
+  content: ''; position: absolute; left: 0; right: 0;
+  height: 1px; background: rgba(26,24,21,0.18);
+}
+.waitlist::before { top: 8px; }
+.waitlist::after { bottom: 8px; }
+.waitlist-inner { max-width: 720px; margin: 0 auto; text-align: center; }
+.waitlist h2 {
+  font-family: var(--serif); font-size: clamp(40px, 5vw, 64px);
+  line-height: 1.1; font-weight: 400; letter-spacing: -0.02em; margin-bottom: 24px;
+}
+.waitlist h2 .ital { font-family: var(--garamond); font-style: italic; color: var(--amber); }
+
+.form-card { margin-top: 48px; text-align: left; display: flex; flex-direction: column; gap: 22px; }
+.field label {
+  display: block; font-family: var(--mono); font-size: 10px;
+  letter-spacing: 0.25em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 8px;
+}
+.field input {
+  width: 100%; padding: 14px 0 12px; border: none;
+  border-bottom: 1px solid var(--ink); background: transparent;
+  font-family: var(--serif); font-size: 22px; color: var(--ink);
+  outline: none; font-weight: 400; transition: border-color 0.2s;
+}
+.field input::placeholder { font-family: var(--garamond); font-style: italic; color: rgba(26,24,21,0.3); font-weight: 400; }
+.field input:focus { border-bottom-color: var(--amber); }
+
+.btn-submit {
+  margin-top: 8px; padding: 18px 28px; background: var(--ink); color: var(--paper);
+  border: none; font-family: var(--serif); font-size: 17px; font-weight: 500;
+  letter-spacing: 0.04em; cursor: pointer;
+  display: flex; justify-content: space-between; align-items: center; transition: background 0.2s;
+}
+.btn-submit:hover { background: var(--amber); color: var(--ink); }
+.btn-submit .arrow { font-family: var(--garamond); font-style: italic; font-size: 22px; }
+
+.thanks { padding: 48px 0; text-align: center; }
+.thanks .seal {
+  width: 72px; height: 72px; border: 1px solid var(--amber); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 24px; font-family: var(--garamond); font-style: italic;
+  font-size: 28px; color: var(--amber);
+}
+.thanks h3 { font-family: var(--serif); font-size: 36px; font-weight: 400; margin-bottom: 12px; }
+.thanks p { font-family: var(--garamond); font-style: italic; color: var(--ink-mute); font-size: 17px; }
+
+.colophon {
+  padding: 60px 40px 48px;
+  border-top: 1px solid rgba(26,24,21,0.18);
+  display: flex; justify-content: space-between; align-items: flex-end;
+  flex-wrap: wrap; gap: 32px;
+  font-family: var(--garamond); font-style: italic; font-size: 13px;
+  color: var(--ink-mute); letter-spacing: 0.05em;
+  max-width: 1280px; margin: 0 auto;
+}
+.colophon .brand-block { font-family: var(--serif); font-style: normal; font-size: 28px; color: var(--ink); font-weight: 500; }
+.colophon .meta { display: flex; gap: 36px; font-family: var(--mono); font-style: normal; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; }
+
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity 1s cubic-bezier(.2,.7,.2,1), transform 1s cubic-bezier(.2,.7,.2,1); }
+.reveal.in { opacity: 1; transform: translateY(0); }
+.reveal-stagger > * { opacity: 0; transform: translateY(18px); transition: opacity 0.9s cubic-bezier(.2,.7,.2,1), transform 0.9s cubic-bezier(.2,.7,.2,1); }
+.reveal-stagger.in > * { opacity: 1; transform: translateY(0); }
+.reveal-stagger.in > *:nth-child(2) { transition-delay: 0.12s; }
+.reveal-stagger.in > *:nth-child(3) { transition-delay: 0.24s; }
+.reveal-stagger.in > *:nth-child(4) { transition-delay: 0.36s; }
+.reveal-stagger.in > *:nth-child(5) { transition-delay: 0.48s; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1.3fr; gap: 80px; margin-top: 24px; align-items: start; }
+.two-col .left .h-section { margin-bottom: 0; }
+.dropcap::first-letter {
+  font-family: var(--garamond); font-style: italic; font-size: 5.4em;
+  float: left; line-height: 0.8; margin: 0.08em 0.08em 0 0; color: var(--amber);
+}
+
+@media (max-width: 880px) {
+  .steps { grid-template-columns: 1fr; }
+  .step { border-right: none; border-bottom: 1px solid rgba(26,24,21,0.12); }
+  .step:last-child { border-bottom: none; }
+  .dialogue { grid-template-columns: 1fr; gap: 40px; }
+  .dialogue .col + .col { border-left: none; border-top: 1px solid rgba(26,24,21,0.18); padding-left: 0; padding-top: 40px; margin-left: 0; }
+  .dialogue .quote { font-size: 22px; }
+  .two-col { grid-template-columns: 1fr; gap: 40px; }
+  .topframe .nav { display: none; }
+  .section { padding: 80px 24px; }
+  .colophon { flex-direction: column; align-items: flex-start; gap: 24px; }
+  .chapter-rail { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 20px; }
+  .rail-stops { min-width: 560px; }
+  .stop { width: 112px; }
+  .stop-top { white-space: normal; max-width: 108px; font-size: 10px; }
+  .body-lg { font-size: 16px; }
+  .waitlist { padding: 80px 24px; }
+}
+
+@media (max-width: 600px) {
+  .section { padding: 64px 20px; }
+  .topframe { padding: 18px 20px; }
+  .divider { padding: 0 20px; }
+  .step-num { font-size: 72px; }
+  .step-title { font-size: 20px; }
+  .step-body { font-size: 14px; }
+  .waitlist { padding: 64px 20px; }
+  .waitlist h2 { font-size: 34px; }
+  .field input { font-size: 18px; }
+  .btn-submit { font-size: 15px; padding: 16px 20px; }
+  .thanks h3 { font-size: 28px; }
+  .colophon { padding: 48px 20px 40px; }
+  /* Book hero on mobile */
+  .book { width: 96vw !important; height: min(460px, 68vh) !important; }
+  .book-page-left { padding: 28px 22px !important; }
+  .book-cover { padding: 0 !important; }
+  .cover-title { font-size: 42px !important; }
+  .hero-h1 { font-size: 22px !important; margin-bottom: 12px !important; }
+  .hero-tagline { font-size: 13px !important; max-width: 100% !important; }
+  .book-cover-inner { padding: 24px 20px !important; }
+}
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+  <script type="text/babel">
+const db = supabase.createClient(
+  'https://larrqnvkowubdjlydqux.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxhcnJxbnZrb3d1YmRqbHlkcXV4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyNzE2NDAsImV4cCI6MjA5Mjg0NzY0MH0.RdQ7vmh6V9uIedv7PJrcbGK7GvD7fOB9-JUbmtCbWjM'
+);
+
+// ── Phone screen mocks ──────────────────────────────────────────
+
+const FolioColors = {
+  paper: '#F2EDE2', paper2: '#EAE3D3',
+  ink: '#1A1815', inkMute: '#6B645A',
+  amber: '#B8884A', amberSoft: '#D9BE8E', card: '#FFFFFF',
+};
+
+const Pill = ({ children, active, icon }) => (
+  <div style={{
+    display: 'inline-flex', alignItems: 'center', gap: 4,
+    padding: '7px 12px', borderRadius: 999,
+    background: active ? FolioColors.ink : FolioColors.card,
+    color: active ? FolioColors.paper : FolioColors.ink,
+    fontSize: 13, fontWeight: 500,
+    border: active ? 'none' : '1px solid rgba(0,0,0,0.06)',
+  }}>
+    {icon && <span style={{fontSize: 13}}>{icon}</span>}
+    {children}
+  </div>
+);
+
+const TabBar = ({ active }) => (
+  <div style={{
+    display: 'flex', justifyContent: 'space-around',
+    padding: '14px 24px 26px', borderTop: '1px solid rgba(0,0,0,0.06)',
+    background: FolioColors.paper,
+  }}>
+    {[
+      {id: 'explore', label: '探索', icon: '◐'},
+      {id: 'create', label: '建立', icon: '⊕'},
+      {id: 'me', label: '我的', icon: '○'},
+    ].map(t => (
+      <div key={t.id} style={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4}}>
+        <div style={{
+          width: 28, height: 28, borderRadius: '50%',
+          background: active === t.id ? 'rgba(0,0,0,0.06)' : 'transparent',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 16, color: FolioColors.ink,
+        }}>{t.icon}</div>
+        <div style={{fontSize: 10, color: active === t.id ? FolioColors.ink : FolioColors.inkMute}}>{t.label}</div>
+      </div>
+    ))}
+  </div>
+);
+
+function ExploreScreen() {
+  return (
+    <div style={{display: 'flex', flexDirection: 'column', height: '100%', background: FolioColors.paper}}>
+      <div style={{padding: '24px 22px 0'}}>
+        <h1 style={{fontSize: 28, fontWeight: 700, margin: 0, color: FolioColors.ink}}>探索</h1>
+        <p style={{fontSize: 12, color: FolioColors.inkMute, margin: '4px 0 18px'}}>找到和你目標相同的夥伴</p>
+        <div style={{display: 'flex', gap: 7, marginBottom: 18}}>
+          <Pill>全部</Pill><Pill active icon="📚">書</Pill>
+          <Pill icon="📝">考試</Pill><Pill icon="🎓">課程</Pill>
+        </div>
+      </div>
+      <div style={{padding: '0 22px', display: 'flex', flexDirection: 'column', gap: 12, flex: 1}}>
+        {[
+          {title: '原子習慣', body: '我拖延了三年，想用這本書改變習慣，希望找個夥伴互相監督，每週分享進度。', time: '約 2 小時 前', milestones: 4},
+          {title: '人類大命運', body: '讀完《人類大歷史》後意猶未盡，想和同樣喜歡宏觀思考的人一起繼續。', time: '約 2 日 前', milestones: 4},
+        ].map(c => (
+          <div key={c.title} style={{background: FolioColors.card, borderRadius: 14, padding: 16, border: '1px solid rgba(0,0,0,0.04)'}}>
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10}}>
+              <div style={{display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 999, background: FolioColors.paper2, fontSize: 11, fontWeight: 500}}>📚 書</div>
+              <span style={{fontSize: 10, color: FolioColors.inkMute}}>{c.time}</span>
+            </div>
+            <h3 style={{margin: '0 0 6px', fontSize: 17, fontWeight: 700}}>{c.title}</h3>
+            <p style={{margin: '0 0 10px', fontSize: 12, color: FolioColors.inkMute, lineHeight: 1.5}}>{c.body}</p>
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(0,0,0,0.04)', paddingTop: 8, fontSize: 11, color: FolioColors.inkMute}}>
+              <span>⚑ {c.milestones} 個里程碑</span><span>›</span>
+            </div>
+          </div>
+        ))}
+      </div>
+      <TabBar active="explore" />
+    </div>
+  );
+}
+
+function CreateScreen() {
+  return (
+    <div style={{display: 'flex', flexDirection: 'column', height: '100%', background: FolioColors.paper}}>
+      <div style={{padding: '24px 22px 18px', flex: 1, overflow: 'hidden'}}>
+        <h1 style={{fontSize: 26, fontWeight: 700, margin: 0}}>建立貼文</h1>
+        <p style={{fontSize: 12, color: FolioColors.inkMute, margin: '4px 0 22px'}}>寫下你的學習動機，找到對的夥伴</p>
+        <label style={{fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 8}}>類型</label>
+        <div style={{display: 'flex', gap: 7, marginBottom: 18}}>
+          <Pill active icon="📚">書</Pill><Pill icon="📝">考試</Pill><Pill icon="🎓">課程</Pill>
+        </div>
+        <label style={{fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 8}}>書名 / 考試 / 課程</label>
+        <div style={{padding: '13px 14px', background: FolioColors.card, borderRadius: 12, fontSize: 13, color: FolioColors.inkMute, marginBottom: 16}}>
+          例：原子習慣、多益 900 分、Andrew N…
+        </div>
+        <label style={{fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 4}}>為什麼要學這個？</label>
+        <p style={{fontSize: 11, color: FolioColors.inkMute, margin: '0 0 8px'}}>這就是你的自我介紹，誠實地寫</p>
+        <div style={{padding: '14px', background: FolioColors.card, borderRadius: 12, fontSize: 13, color: FolioColors.inkMute, height: 86, marginBottom: 16, lineHeight: 1.5}}>
+          你希望從這本書/課程/考試得到什麼？為什麼現在？
+        </div>
+        <label style={{fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 4}}>里程碑數量</label>
+        <p style={{fontSize: 11, color: FolioColors.inkMute, margin: '0 0 8px'}}>完成幾個里程碑後可以選擇揭露身份</p>
+        <div style={{display: 'flex', gap: 8}}>
+          {[4,6,8,12].map((n,i) => (
+            <div key={n} style={{width: 44, height: 44, borderRadius: 10, background: i === 0 ? FolioColors.ink : FolioColors.card, color: i === 0 ? FolioColors.paper : FolioColors.ink, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, fontSize: 15}}>{n}</div>
+          ))}
+        </div>
+      </div>
+      <TabBar active="create" />
+    </div>
+  );
+}
+
+function MeScreen() {
+  return (
+    <div style={{display: 'flex', flexDirection: 'column', height: '100%', background: FolioColors.paper}}>
+      <div style={{padding: '24px 22px', flex: 1}}>
+        <div style={{fontSize: 18, fontWeight: 700, marginBottom: 22, color: FolioColors.ink}}>Folio</div>
+        <div style={{fontSize: 14, fontWeight: 600, marginBottom: 12}}>學習配對</div>
+        <div style={{background: FolioColors.card, borderRadius: 14, padding: 16, marginBottom: 22}}>
+          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8}}>
+            <div style={{display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 999, background: FolioColors.paper2, fontSize: 11, fontWeight: 500}}>🎓 課程</div>
+            <div style={{padding: '4px 10px', borderRadius: 999, background: 'rgba(184,136,74,0.15)', fontSize: 11, color: FolioColors.amber, fontWeight: 500}}>夥伴 A</div>
+          </div>
+          <h3 style={{margin: '0 0 10px', fontSize: 16, fontWeight: 700}}>Andrew Ng 機器學習課程</h3>
+          <div style={{height: 4, background: 'rgba(0,0,0,0.06)', borderRadius: 2, marginBottom: 8, overflow: 'hidden'}}>
+            <div style={{width: '33%', height: '100%', background: FolioColors.amber}} />
+          </div>
+          <div style={{fontSize: 11, color: FolioColors.inkMute}}>2 / 6 里程碑</div>
+        </div>
+        <div style={{fontSize: 14, fontWeight: 600, marginBottom: 12}}>我的貼文</div>
+        <div style={{background: FolioColors.card, borderRadius: 14, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 10}}>
+          <div style={{display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 999, background: FolioColors.paper2, fontSize: 11, fontWeight: 500}}>📚 書</div>
+          <span style={{fontSize: 14, fontWeight: 600, flex: 1}}>刻意練習</span>
+          <span style={{padding: '4px 10px', borderRadius: 999, background: 'rgba(184,136,74,0.15)', fontSize: 11, color: FolioColors.amber}}>2 個申請</span>
+          <span style={{color: FolioColors.inkMute}}>›</span>
+        </div>
+      </div>
+      <TabBar active="me" />
+    </div>
+  );
+}
+
+// ── Main app ────────────────────────────────────────────────────
+
+const { useState, useEffect, useRef } = React;
+
+function useIsMobile() {
+  const [mobile, setMobile] = useState(() => window.innerWidth < 768);
+  useEffect(() => {
+    const handler = () => setMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+  return mobile;
+}
+
+function MiniPhone({ children }) {
+  const W = 280, H = 580;
+  return (
+    <div style={{width: W, height: H, position: 'relative'}}>
+      <div style={{width: W, height: H, borderRadius: 42, background: '#1A1815', padding: 8, boxShadow: '0 30px 60px -20px rgba(26,24,21,0.35), 0 0 0 1px rgba(0,0,0,0.1)', position: 'relative'}}>
+        <div style={{width: '100%', height: '100%', borderRadius: 34, overflow: 'hidden', background: '#F2EDE2', position: 'relative'}}>
+          <div style={{position: 'absolute', top: 6, left: '50%', transform: 'translateX(-50%)', width: 96, height: 26, borderRadius: 14, background: '#1A1815', zIndex: 10}} />
+          <div style={{display: 'flex', justifyContent: 'space-between', padding: '12px 24px 6px', fontSize: 12, fontWeight: 600, position: 'relative', zIndex: 5}}>
+            <span>9:43</span>
+            <span style={{display: 'flex', gap: 4, alignItems: 'center'}}>
+              <span style={{fontSize: 9}}>●●●●</span><span>📶</span><span>🔋</span>
+            </span>
+          </div>
+          <div style={{height: 'calc(100% - 36px)', overflow: 'hidden', position: 'relative'}}>
+            {children}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Reveal({ children, stagger = false, threshold = 0.18, className = '', style, as: Tag = 'div' }) {
+  const ref = useRef(null);
+  const [shown, setShown] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { setShown(true); obs.disconnect(); }
+    }, { threshold });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [threshold]);
+  return (
+    <Tag ref={ref} className={`${stagger ? 'reveal-stagger' : 'reveal'} ${shown ? 'in' : ''} ${className}`} style={style}>
+      {children}
+    </Tag>
+  );
+}
+
+function Hero() {
+  const isMobile = useIsMobile();
+  const stageRef = useRef(null);
+  const [openness, setOpenness] = useState(0);
+
+  useEffect(() => {
+    const onScroll = () => {
+      const el = stageRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const total = rect.height + vh * 0.6;
+      const progressed = Math.max(0, vh * 0.2 - rect.top);
+      const k = Math.min(1, Math.max(0, progressed / total * 1.6));
+      setOpenness(k);
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  const coverRot = -openness * 168;
+  const liftY = -openness * 16;
+  const titleOpacity = Math.max(0, 1 - openness * 1.6);
+
+  return (
+    <section className="hero" ref={stageRef}>
+      <div className="hero-stage">
+        <div className="book" style={{transform: `translateY(${liftY}px) rotateX(${openness * -2}deg)`, transition: 'transform 0.4s ease-out'}}>
+          <div className="book-page book-page-left">
+            <div>
+              <div style={{fontFamily: 'var(--garamond)', fontStyle: 'italic', fontSize: 13, color: 'var(--ink-mute)', letterSpacing: '0.18em', marginBottom: 24}}>— i —</div>
+              <div style={{fontFamily: 'var(--garamond)', fontStyle: 'italic', fontSize: 13, color: 'var(--ink-mute)', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: 14}}>Preface</div>
+              <h1 className="hero-h1">
+                你讀的書，<br/>
+                <span className="ital">就是你的</span><br/>
+                自我介紹。
+              </h1>
+              <p className="hero-tagline" style={{marginTop: 24}}>
+                Folio 是一個讀書交友 app。<br/>
+                先匿名，一起讀完一本書，<br/>
+                再決定要不要認識彼此。
+              </p>
+            </div>
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end'}}>
+              <span style={{fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.3em', color: 'var(--ink-mute)'}}>EST. 2026</span>
+              <span style={{fontFamily: 'var(--garamond)', fontStyle: 'italic', fontSize: 12, color: 'var(--ink-mute)'}}>i</span>
+            </div>
+          </div>
+
+          <div className="book-cover" style={{transform: `rotateY(${coverRot}deg)`, transition: 'transform 0.5s cubic-bezier(.2,.7,.2,1)'}}>
+            <div style={{position: 'absolute', inset: 0, padding: '38px 40px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', backfaceVisibility: 'hidden', opacity: titleOpacity, background: 'linear-gradient(180deg, rgba(0,0,0,0.04), transparent 30%, rgba(0,0,0,0.05)), var(--paper-deep)'}}>
+              <div>
+                <div className="cover-tag">A reading-first social app</div>
+                <div className="cover-rule" style={{marginTop: 14, marginBottom: 36}} />
+                <h2 className="cover-title">Folio<span className="amp">.</span></h2>
+                <p style={{marginTop: 18, fontFamily: 'var(--garamond)', fontStyle: 'italic', fontSize: 17, color: 'var(--ink-soft)'}}>
+                  for those who'd rather <br/>finish a book together.
+                </p>
+              </div>
+              <div className="cover-meta">
+                <span>Vol. 01 — Spring '26</span>
+                <span>Closed beta · waitlist open</span>
+              </div>
+            </div>
+            <div className="book-cover-inner">
+              <div style={{fontFamily: 'var(--garamond)', fontStyle: 'italic', fontSize: 13, color: 'var(--ink-mute)', letterSpacing: '0.18em'}}>— endpaper —</div>
+              <div style={{fontFamily: 'var(--serif)', fontSize: 22, lineHeight: 1.5, fontWeight: 400, color: 'var(--ink-soft)', fontStyle: 'italic'}}>
+                "We read to know <br/>we are not alone."
+              </div>
+              <div style={{fontFamily: 'var(--garamond)', fontStyle: 'italic', fontSize: 12, color: 'var(--ink-mute)'}}>— C.S. Lewis (apocryphal)</div>
+            </div>
+          </div>
+
+          <div className="book-spine" style={{opacity: 1 - openness * 0.6}} />
+        </div>
+
+        {openness < 0.2 && (
+          <div className="scroll-hint">
+            <span>Scroll to open</span>
+            <div className="line" />
+          </div>
+        )}
+
+        <div style={{position: 'absolute', right: 'calc(50% - min(820px, 88vw)/2 + 60px)', top: 0, width: 12, height: 240, background: 'var(--amber)', opacity: openness > 0.5 ? 1 : 0, transition: 'opacity 0.6s', clipPath: 'polygon(0 0, 100% 0, 100% 100%, 50% 90%, 0 100%)', zIndex: 5, pointerEvents: 'none'}} />
+      </div>
+    </section>
+  );
+}
+
+function Intro() {
+  return (
+    <section className="section">
+      <Reveal>
+        <div className="section-num">CHAPTER ONE</div>
+        <div className="two-col" style={{marginTop: 32}}>
+          <div className="left">
+            <div className="eyebrow">the premise</div>
+            <h2 className="h-section">
+              交友軟體告訴你<br/>
+              <span style={{fontFamily: 'var(--garamond)', fontStyle: 'italic', color: 'var(--amber)'}}>長相</span>。<br/>
+              Folio 想知道<br/>
+              你在<span style={{fontFamily: 'var(--garamond)', fontStyle: 'italic', color: 'var(--amber)'}}>讀什麼</span>。
+            </h2>
+          </div>
+          <div className="right">
+            <p className="body-lg dropcap">我們相信，一個人正在讀的書，比他十張自拍說得更多。在 Folio，你不是先看到一張臉、再決定要不要聊天——你是先選一本你想讀完的書，然後在書裡找到一個願意跟你慢慢讀的人。</p>
+            <p className="body-lg" style={{marginTop: 24}}>讀完之前，沒有名字、沒有照片、沒有 Instagram。只有你們約好一起翻的那 280 頁，和路上忍不住想分享的句子。</p>
+          </div>
+        </div>
+      </Reveal>
+    </section>
+  );
+}
+
+function HowItWorks() {
+  const steps = [
+    { n: 'I', title: '挑一本書，貼出邀請', body: '寫下你想讀的書、為什麼想讀、希望幾天讀完。這就是你的自我介紹——比履歷誠實，比 bio 有趣。' },
+    { n: 'II', title: '匿名配對，一起翻頁', body: '想讀同一本書的人會看到你。配對成功後你們以「夥伴 A / B」相稱，每天（或每週）共讀一個章節，可以聊書、聊別的，但不能交換身份。' },
+    { n: 'III', title: '讀完了，再決定要不要認識', body: '到達最後一個里程碑時，你們各自選擇是否揭露身份。雙方同意，才看見對方的名字、照片、聯絡方式。' },
+  ];
+  return (
+    <section className="section" id="how">
+      <Reveal>
+        <div className="section-num">CHAPTER TWO</div>
+        <div className="eyebrow" style={{marginTop: 24}}>how it works</div>
+        <h2 className="h-section">三件事，<span style={{fontFamily: 'var(--garamond)', fontStyle: 'italic', color: 'var(--amber)'}}>不多不少</span>。</h2>
+      </Reveal>
+      <Reveal stagger>
+        <div className="steps">
+          {steps.map(s => (
+            <div key={s.n} className="step">
+              <div className="step-num">{s.n}</div>
+              <h3 className="step-title">{s.title}</h3>
+              <p className="step-body">{s.body}</p>
+            </div>
+          ))}
+        </div>
+      </Reveal>
+    </section>
+  );
+}
+
+function WhyAnonymous() {
+  return (
+    <section className="section" id="why">
+      <Reveal>
+        <div className="section-num">CHAPTER THREE</div>
+        <div className="eyebrow" style={{marginTop: 24}}>why anonymous</div>
+        <h2 className="h-section">先讀完，<br/>再相認。</h2>
+      </Reveal>
+      <Reveal stagger>
+        <div className="dialogue">
+          <div className="col">
+            <div className="label">— 一般 dating app —</div>
+            <p className="quote crossed">先看臉，<br/>再看 bio，<br/>再決定要不要聊。</p>
+            <p className="attr">三秒鐘的判斷，三句話的對話。</p>
+          </div>
+          <div className="col">
+            <div className="label">— Folio —</div>
+            <p className="quote">
+              先一起讀，<br/>再一起想，<br/>
+              <span style={{fontFamily: 'var(--garamond)', fontStyle: 'italic', color: 'var(--amber)'}}>讀完才相認。</span>
+            </p>
+            <p className="attr">用一本書的時間，認識一個人的腦袋。</p>
+          </div>
+        </div>
+      </Reveal>
+      <Reveal>
+        <p className="body-lg" style={{maxWidth: 680, marginTop: 80, marginInline: 'auto', textAlign: 'center', fontStyle: 'italic', fontFamily: 'var(--serif)'}}>
+          匿名不是要你藏起來。是讓你不必先包裝自己——讓對方先聽見你怎麼想，再看見你長怎樣。
+        </p>
+      </Reveal>
+    </section>
+  );
+}
+
+function Milestones() {
+  const railRef = useRef(null);
+  const [active, setActive] = useState(false);
+  useEffect(() => {
+    const el = railRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { setActive(true); obs.disconnect(); }
+    }, { threshold: 0.4 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  const stops = [
+    { label: 'Ch. 1', name: '配對成立', top: '夥伴 A 接受你的邀請' },
+    { label: 'Ch. 2', name: '第一個里程碑', top: '讀到 25%' },
+    { label: 'Ch. 3', name: '第二個里程碑', top: '讀到 50%' },
+    { label: 'Ch. 4', name: '第三個里程碑', top: '讀到 75%' },
+    { label: 'Ch. 5', name: '完成 · 揭露', top: '雙方同意 → 認識本人' },
+  ];
+
+  return (
+    <section className="section" id="milestones">
+      <Reveal>
+        <div className="section-num">CHAPTER FOUR</div>
+        <div className="eyebrow" style={{marginTop: 24}}>milestones</div>
+        <h2 className="h-section">每一章，都是一次<br/><span style={{fontFamily: 'var(--garamond)', fontStyle: 'italic', color: 'var(--amber)'}}>更靠近</span>。</h2>
+        <p className="body-lg" style={{maxWidth: 620, marginTop: 24}}>建立貼文時，你決定要把這本書切成幾個里程碑（4 / 6 / 8 / 12）。每完成一個，雙方都會收到一個提示——你們可以選擇繼續匿名，或在最後一站決定揭露彼此。</p>
+      </Reveal>
+      <div className="chapter-rail" ref={railRef}>
+        <div className="rail-line" />
+        <div className="rail-progress" style={{transform: active ? 'scaleX(1)' : 'scaleX(0)'}} />
+        <div className="rail-stops">
+          {stops.map((s, i) => (
+            <div key={i} className={`stop ${active && i < 4 ? 'done' : ''} ${active && i === 4 ? 'reveal' : ''}`} style={{transitionDelay: `${i * 0.18}s`}}>
+              <div className="stop-top">{s.top}</div>
+              <div className="stop-dot" style={{transitionDelay: `${i * 0.18}s`}} />
+              <div className="stop-label">{s.label}</div>
+              <div className="stop-name">{s.name}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function PhonesShowcase() {
+  const isMobile = useIsMobile();
+  const screens = [
+    { title: '探索', sub: '看到所有正在等夥伴的書、考試、課程貼文。', Screen: ExploreScreen },
+    { title: '建立', sub: '寫下你想讀什麼、為什麼、要切成幾個里程碑。', Screen: CreateScreen },
+    { title: '我的', sub: '正在配對中的書、累積的進度、收到的申請。', Screen: MeScreen },
+  ];
+
+  const wrapRef = useRef(null);
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const onScroll = () => {
+      const el = wrapRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const total = el.offsetHeight - window.innerHeight;
+      const scrolled = Math.min(total, Math.max(0, -rect.top));
+      const k = (scrolled / total) * screens.length;
+      setProgress(Math.max(0, Math.min(screens.length - 0.0001, k)));
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    return () => { window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll); };
+  }, [screens.length]);
+
+  const phoneScale = isMobile ? 0.68 : 1;
+  const phoneH = 580 * phoneScale;
+
+  return (
+    <section id="screens" ref={wrapRef} style={{position: 'relative', height: `${isMobile ? 80 : 100}vh + ${screens.length * 100}vh`, height: `calc(${isMobile ? 80 : 100}vh + ${screens.length * 100}vh)`}}>
+      <div style={{position: 'sticky', top: 0, height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden'}}>
+        {isMobile ? (
+          /* ── Mobile: stacked layout ── */
+          <div style={{width: '100%', padding: '0 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0}}>
+            <div style={{textAlign: 'center', marginBottom: 20}}>
+              <div className="section-num">CHAPTER FIVE</div>
+              <div style={{display: 'inline-block', padding: '5px 10px', border: '1px solid var(--amber)', color: 'var(--amber)', fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase', marginTop: 12}}>
+                ● 目前進度 — 開發中
+              </div>
+              <p style={{fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--ink-mute)', lineHeight: 1.6, marginTop: 10, fontWeight: 300}}>
+                第一階段開放<span style={{color: 'var(--ink)'}}>書籍共讀</span>，<br/>考試備考、線上課程後續陸續上線。
+              </p>
+            </div>
+
+            {/* Phone stack */}
+            <div style={{position: 'relative', height: phoneH + 20, width: 280 * phoneScale, flexShrink: 0}}>
+              {screens.map((s, i) => {
+                const dist = progress - i;
+                const abs = Math.abs(dist);
+                return (
+                  <div key={i} style={{position: 'absolute', top: 0, left: 0, transformOrigin: 'top center', opacity: Math.max(0, 1 - abs * 1.2), transform: `translateY(${dist * -40}px) scale(${(1 - abs * 0.08) * phoneScale})`, transition: 'opacity 0.5s, transform 0.5s', zIndex: 10 - Math.round(abs * 10), pointerEvents: abs < 0.5 ? 'auto' : 'none'}}>
+                    <MiniPhone><s.Screen /></MiniPhone>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Captions */}
+            <div style={{position: 'relative', height: 120, width: '100%', textAlign: 'center', marginTop: 12}}>
+              {screens.map((s, i) => {
+                const dist = progress - i;
+                const opacity = Math.max(0, 1 - Math.abs(dist) * 1.4);
+                return (
+                  <div key={i} style={{position: 'absolute', inset: 0, opacity, transform: `translateY(${dist * -16}px)`, transition: 'opacity 0.4s, transform 0.4s', pointerEvents: 'none'}}>
+                    <h3 style={{fontFamily: 'var(--serif)', fontSize: 26, fontWeight: 500, margin: '0 0 8px', letterSpacing: '-0.01em'}}>{s.title}</h3>
+                    <p style={{fontFamily: 'var(--sans)', fontSize: 14, lineHeight: 1.6, color: 'var(--ink-soft)', fontWeight: 300, margin: 0}}>{s.sub}</p>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Progress dots */}
+            <div style={{display: 'flex', gap: 10, marginTop: 8}}>
+              {screens.map((_, i) => {
+                const isActive = Math.round(progress) === i;
+                const isPast = progress > i + 0.5;
+                return <div key={i} style={{width: isActive ? 28 : 8, height: 2, background: isPast || isActive ? 'var(--ink)' : 'rgba(26,24,21,0.25)', transition: 'all 0.4s'}} />;
+              })}
+            </div>
+          </div>
+        ) : (
+          /* ── Desktop: side-by-side layout ── */
+          <div style={{maxWidth: 1280, width: '100%', padding: '0 40px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80, alignItems: 'center'}}>
+            <div style={{position: 'relative'}}>
+              <div className="section-num">CHAPTER FIVE</div>
+              <div className="eyebrow" style={{marginTop: 24}}>the app</div>
+              <h2 className="h-section" style={{marginBottom: 12}}>
+                三個畫面，<br/>
+                <span style={{fontFamily: 'var(--garamond)', fontStyle: 'italic', color: 'var(--amber)'}}>一條線</span>串起來。
+              </h2>
+              <div style={{display: 'inline-block', padding: '6px 12px', border: '1px solid var(--amber)', color: 'var(--amber)', fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase', marginTop: 8}}>
+                ● 目前進度 — 開發中
+              </div>
+              <p style={{fontFamily: 'var(--sans)', fontSize: 14, color: 'var(--ink-mute)', lineHeight: 1.7, marginTop: 12, marginBottom: 32, fontWeight: 300, maxWidth: 360}}>
+                第一階段開放<span style={{color: 'var(--ink)'}}>書籍共讀</span>，考試備考、線上課程後續陸續上線。
+              </p>
+              <div style={{position: 'relative', height: 200}}>
+                {screens.map((s, i) => {
+                  const dist = progress - i;
+                  const opacity = Math.max(0, 1 - Math.abs(dist) * 1.4);
+                  const y = dist * -40;
+                  return (
+                    <div key={i} style={{position: 'absolute', top: 0, left: 0, right: 0, opacity, transform: `translateY(${y}px)`, transition: 'opacity 0.4s, transform 0.4s', pointerEvents: opacity > 0.5 ? 'auto' : 'none'}}>
+                      <div style={{fontFamily: 'var(--garamond)', fontStyle: 'italic', fontSize: 14, color: 'var(--amber)', marginBottom: 8, letterSpacing: '0.05em'}}>— {String(i + 1).padStart(2, '0')} / {String(screens.length).padStart(2, '0')} —</div>
+                      <h3 style={{fontFamily: 'var(--serif)', fontSize: 36, fontWeight: 500, margin: '0 0 12px', letterSpacing: '-0.01em'}}>{s.title}</h3>
+                      <p style={{fontFamily: 'var(--sans)', fontSize: 16, lineHeight: 1.7, color: 'var(--ink-soft)', fontWeight: 300, maxWidth: 360, margin: 0}}>{s.sub}</p>
+                    </div>
+                  );
+                })}
+              </div>
+              <div style={{display: 'flex', gap: 10, marginTop: 32}}>
+                {screens.map((_, i) => {
+                  const isActive = Math.round(progress) === i;
+                  const isPast = progress > i + 0.5;
+                  return <div key={i} style={{width: isActive ? 28 : 8, height: 2, background: isPast || isActive ? 'var(--ink)' : 'rgba(26,24,21,0.25)', transition: 'all 0.4s'}} />;
+                })}
+              </div>
+            </div>
+
+            <div style={{position: 'relative', height: 600, display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+              {screens.map((s, i) => {
+                const dist = progress - i;
+                const abs = Math.abs(dist);
+                return (
+                  <div key={i} style={{position: 'absolute', opacity: Math.max(0, 1 - abs * 1.2), transform: `translateY(${dist * -60}px) scale(${1 - abs * 0.08})`, transition: 'opacity 0.5s, transform 0.5s', zIndex: 10 - Math.round(abs * 10), pointerEvents: abs < 0.5 ? 'auto' : 'none'}}>
+                    <MiniPhone><s.Screen /></MiniPhone>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function Waitlist() {
+  const [email, setEmail] = useState('');
+  const [book, setBook] = useState('');
+  const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    if (!email) return;
+    setLoading(true);
+    setError('');
+    const { error: err } = await db.from('waitlist').insert({ email, book });
+    setLoading(false);
+    if (err) {
+      setError('送出失敗，請稍後再試。');
+      return;
+    }
+    setSubmitted(true);
+  };
+
+  return (
+    <section className="waitlist" id="waitlist">
+      <div className="waitlist-inner">
+        <Reveal>
+          <div className="section-num">EPILOGUE</div>
+          <div className="eyebrow" style={{marginTop: 24, justifyContent: 'center'}}>join the waitlist</div>
+          <h2>把你想讀的<br/><span className="ital">第一本書</span>，<br/>告訴我們。</h2>
+        </Reveal>
+        {!submitted ? (
+          <Reveal>
+            <form className="form-card" onSubmit={onSubmit}>
+              <div className="field">
+                <label>Email</label>
+                <input type="email" required placeholder="your@email.com" value={email} onChange={e => setEmail(e.target.value)} />
+              </div>
+              <div className="field">
+                <label>你想讀的第一本書</label>
+                <input type="text" placeholder="《原子習慣》、Sapiens、any title…" value={book} onChange={e => setBook(e.target.value)} />
+              </div>
+              {error && (
+                <p style={{fontFamily: 'var(--sans)', fontSize: 13, color: '#c0392b', textAlign: 'center', margin: 0}}>{error}</p>
+              )}
+              <button className="btn-submit" type="submit" disabled={loading} style={{opacity: loading ? 0.6 : 1, cursor: loading ? 'default' : 'pointer'}}>
+                <span>{loading ? '送出中…' : '送出 — Reserve my seat'}</span>
+                <span className="arrow">→</span>
+              </button>
+              <p style={{fontFamily: 'var(--garamond)', fontStyle: 'italic', fontSize: 13, color: 'var(--ink-mute)', textAlign: 'center', marginTop: 4}}>我們不寄行銷信。只在 beta 開放時通知你。</p>
+            </form>
+          </Reveal>
+        ) : (
+          <div className="thanks">
+            <div className="seal">F</div>
+            <h3>登記完成。</h3>
+            <p>我們收到了，會第一時間通知你。</p>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function TopFrame() {
+  return (
+    <header className="topframe">
+      <div className="brand">Folio<span className="dot">.</span></div>
+      <nav className="nav">
+        <a href="#how">How it works</a>
+        <a href="#why">Why anonymous</a>
+        <a href="#milestones">Milestones</a>
+        <a href="#waitlist" style={{color: 'var(--ink)'}}>Join waitlist →</a>
+      </nav>
+    </header>
+  );
+}
+
+function Colophon() {
+  return (
+    <footer>
+      <div className="colophon">
+        <div>
+          <div className="brand-block">Folio.</div>
+          <p style={{fontFamily: 'var(--garamond)', fontStyle: 'italic', marginTop: 6, fontSize: 14}}>A reading-first social app. Spring 2026.</p>
+        </div>
+        <div className="meta">
+          <span>Set in Noto Serif TC<br/>& EB Garamond</span>
+          <span>© MMXXVI</span>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+function Corners() {
+  const Mark = () => (
+    <svg viewBox="0 0 18 18"><path d="M0 0 H18 M0 0 V18" stroke="currentColor" strokeWidth="0.8" fill="none" /></svg>
+  );
+  return (
+    <React.Fragment>
+      <div className="corner tl"><Mark/></div>
+      <div className="corner tr"><Mark/></div>
+      <div className="corner bl"><Mark/></div>
+      <div className="corner br"><Mark/></div>
+    </React.Fragment>
+  );
+}
+
+function FolioLanding() {
+  return (
+    <div className="folio-root">
+      <Corners />
+      <TopFrame />
+      <Hero />
+      <div className="divider"><div className="line"/><span className="ornament">❦</span><div className="line"/></div>
+      <Intro />
+      <div className="divider"><div className="line"/><span className="ornament">§</span><div className="line"/></div>
+      <HowItWorks />
+      <div className="divider"><div className="line"/><span className="ornament">❦</span><div className="line"/></div>
+      <WhyAnonymous />
+      <div className="divider"><div className="line"/><span className="ornament">§</span><div className="line"/></div>
+      <Milestones />
+      <div className="divider"><div className="line"/><span className="ornament">❦</span><div className="line"/></div>
+      <PhonesShowcase />
+      <Waitlist />
+      <Colophon />
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<FolioLanding />);
+  </script>
+</body>
+</html>

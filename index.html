@@ -676,6 +676,23 @@ function Hero() {
           <div className="book-spine" style={{opacity: 1 - openness * 0.6}} />
         </div>
 
+        <a href="#waitlist" style={{
+          position: 'absolute',
+          top: 'calc(50% + min(560px, 64vh) / 2 + 28px)', left: '50%', transform: 'translateX(-50%)',
+          display: 'inline-flex', alignItems: 'center', gap: 10,
+          padding: '12px 20px',
+          background: 'var(--ink)', color: 'var(--paper)',
+          fontFamily: 'var(--serif)', fontSize: 14, fontWeight: 500,
+          letterSpacing: '0.04em', textDecoration: 'none',
+          transition: 'background 0.2s', zIndex: 5,
+        }}
+        onMouseEnter={e => e.currentTarget.style.background = 'var(--amber)'}
+        onMouseLeave={e => e.currentTarget.style.background = 'var(--ink)'}
+        >
+          加入 Waitlist
+          <span style={{fontFamily: 'var(--garamond)', fontStyle: 'italic', fontSize: 18}}>→</span>
+        </a>
+
         {openness < 0.2 && (
           <div className="scroll-hint">
             <span>Scroll to open</span>
